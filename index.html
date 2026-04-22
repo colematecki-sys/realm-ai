@@ -184,7 +184,7 @@ input,textarea,select{font-family:Georgia,serif;}
     <a class="nav-link" onclick="showPage('landing')">Home</a>
     <a class="nav-link" onclick="showPage('wizard')">Create Character</a>
     <a class="nav-link" onclick="showPage('dm')">Play</a>
-    <button class="nav-cta" onclick="showPage('landing');setTimeout(()=>document.getElementById('waitlist-email').focus(),100)">Join free</button>
+    <button class="nav-cta" onclick="window.open('https://buy.stripe.com/aFa14pfFp5uTa6g8RR7ok00','_blank')">Join free</button>
   </div>
 </nav>
 
@@ -268,7 +268,7 @@ input,textarea,select{font-family:Georgia,serif;}
         <div class="price-feature"><span class="pf-check">+</span>Save campaign progress</div>
         <div class="price-feature"><span class="pf-check">+</span>Multiple characters</div>
         <div class="price-feature"><span class="pf-check">+</span>Custom world settings</div>
-        <button class="price-btn gold-btn" onclick="joinWaitlist('waitlist-email','success1');showPage('landing')">Join waitlist</button>
+        <a href="https://buy.stripe.com/aFa14pfFp5uTa6g8RR7ok00" target="_blank"><button class="price-btn gold-btn">Subscribe — $7.99/mo</button></a>
       </div>
       <div class="price-card">
         <div class="price-tier">Guild — $14.99/mo</div>
@@ -277,7 +277,7 @@ input,textarea,select{font-family:Georgia,serif;}
         <div class="price-feature"><span class="pf-check">+</span>Everything in Hero</div>
         <div class="price-feature"><span class="pf-check">+</span>Up to 4 players per campaign</div>
         <div class="price-feature"><span class="pf-check">+</span>Shared party campaigns</div>
-        <button class="price-btn" onclick="joinWaitlist('waitlist-email','success1');showPage('landing')">Join waitlist</button>
+        <a href="https://buy.stripe.com/3cI9AVgJt0az92cc437ok01" target="_blank"><button class="price-btn">Subscribe — $14.99/mo</button></a>
       </div>
     </div>
   </div>
@@ -301,7 +301,7 @@ input,textarea,select{font-family:Georgia,serif;}
     <p style="font-size:14px;color:var(--text-mute);margin-bottom:28px;">No DM. No scheduling. No waiting. Just you and the story.</p>
     <div class="waitlist-form" style="max-width:380px;">
       <input class="waitlist-input" id="waitlist-email-2" type="email" placeholder="Enter your email..."/>
-      <button class="waitlist-btn" onclick="joinWaitlist('waitlist-email-2','success2')">Join free</button>
+      <button class="waitlist-btn" onclick="window.open('https://buy.stripe.com/aFa14pfFp5uTa6g8RR7ok00','_blank')">Join free</button>
     </div>
     <div class="success-msg" id="success2" style="margin-top:10px;">You're on the list. We'll be in touch.</div>
   </div>
