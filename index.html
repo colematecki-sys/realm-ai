@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Realm AI — AI Dungeon Master</title>
+<meta name="description" content="AI-powered Dungeon Master and campaign builder for solo and group tabletop RPG. Play D&D-style adventures in your browser, no DM required."/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--gold:#d4a85a;--gold-dark:#8b5a20;--gold-dim:#5a4a30;--gold-mute:#3a2e1a;--bg:#0e0c09;--bg2:#12100d;--bg3:#1a1410;--bg4:#1e1810;--border:#2a2015;--text:#c8b89a;--text-dim:#7a6040;--text-mute:#5a4a30;--text-ghost:#3a2e1a;--green:#5dcaa5;--green-bg:#0f1a0f;--green-border:#1a2e1a;--red-bg:#2a1810;--red-border:#8b3a2a;}
+body{background:var(--bg);font-family:Georgia,serif;color:var(--text);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+button{font-family:Georgia,serif;cursor:pointer;}
+input,textarea,select{font-family:Georgia,serif;}
+
+/* ── NAV ── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;border-bottom:0.5px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;}
+.nav-logo{font-size:16px;font-weight:700;color:var(--gold);}
+.nav-logo span{color:var(--text-mute);font-size:11px;font-weight:400;margin-left:6px;}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-link{font-size:13px;color:var(--text-dim);cursor:pointer;}
+.nav-link:hover{color:var(--gold);}
+.nav-cta{background:#5a3a10;border:0.5px solid var(--gold-dark);border-radius:6px;padding:7px 16px;font-size:13px;color:var(--gold);font-weight:700;}
+.nav-cta:hover{background:#7a4a15;}
+
+/* ── PAGES ── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── LANDING ── */
+.hero{text-align:center;padding:80px 40px 60px;max-width:720px;margin:0 auto;}
+.hero-eyebrow{font-size:11px;color:var(--gold-dark);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:18px;border:0.5px solid var(--gold-mute);display:inline-block;padding:4px 14px;border-radius:20px;background:var(--bg3);}
+.hero-title{font-size:44px;font-weight:700;color:var(--gold);line-height:1.15;margin-bottom:16px;letter-spacing:-0.5px;}
+.hero-title span{color:var(--text);}
+.hero-sub{font-size:16px;color:var(--text-dim);line-height:1.7;margin-bottom:36px;}
+.waitlist-form{display:flex;gap:10px;max-width:420px;margin:0 auto 12px;}
+.waitlist-input{flex:1;background:var(--bg3);border:0.5px solid var(--gold-mute);border-radius:7px;padding:12px 16px;font-size:14px;color:var(--text);outline:none;}
+.waitlist-input::placeholder{color:var(--gold-mute);}
+.waitlist-input:focus{border-color:var(--gold-dark);}
+.waitlist-btn{background:var(--gold);border:none;border-radius:7px;padding:12px 22px;font-size:14px;color:var(--bg);font-weight:700;}
+.waitlist-btn:hover{background:#e8c070;}
+.hero-note{font-size:12px;color:var(--text-ghost);}
+.social-proof{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:28px;flex-wrap:wrap;}
+.sp-item{font-size:12px;color:var(--text-mute);}
+.sp-dot{width:3px;height:3px;background:var(--gold-mute);border-radius:50%;}
+.success-msg{font-size:13px;color:var(--green);margin-top:10px;display:none;}
+.divider{border:none;border-top:0.5px solid var(--border);}
+.section{padding:64px 40px;max-width:880px;margin:0 auto;}
+.section-label{font-size:11px;color:var(--gold-dark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.section-title{font-size:28px;font-weight:700;color:var(--gold);margin-bottom:8px;line-height:1.3;}
+.section-sub{font-size:14px;color:var(--text-dim);line-height:1.7;margin-bottom:36px;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.feat-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:20px;}
+.feat-icon{font-size:20px;margin-bottom:10px;display:block;}
+.feat-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px;}
+.feat-body{font-size:12px;color:var(--text-mute);line-height:1.6;}
+.demo-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.dm-bubble{background:var(--bg4);border:0.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.dm-lbl{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
+.dm-txt{font-size:13px;color:var(--text);line-height:1.7;}
+.player-bubble{background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.player-lbl{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
+.player-txt{font-size:13px;color:#9fc8a8;line-height:1.6;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.price-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:22px;}
+.price-card.featured{border-color:var(--gold);}
+.price-tier{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;}
+.price-tier.gold{color:var(--gold);}
+.price-amount{font-size:30px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.price-amount span{font-size:13px;font-weight:400;color:var(--text-mute);}
+.price-desc{font-size:12px;color:var(--text-mute);margin-bottom:14px;padding-bottom:14px;border-bottom:0.5px solid var(--border);}
+.price-feature{font-size:12px;color:var(--text-dim);padding:4px 0;display:flex;gap:8px;line-height:1.5;}
+.pf-check{color:var(--green);font-size:11px;flex-shrink:0;}
+.price-btn{width:100%;background:var(--red-bg);border:0.5px solid #5a3a10;border-radius:6px;padding:10px;font-size:13px;color:var(--gold);margin-top:16px;font-weight:700;}
+.price-btn:hover{background:#3a2015;}
+.price-btn.gold-btn{background:#5a3a10;border-color:var(--gold);}
+.price-btn.gold-btn:hover{background:#7a4a15;}
+.badge-pop{font-size:10px;background:var(--red-bg);color:var(--gold);border:0.5px solid var(--gold-dark);border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px;}
+.faq-item{border-bottom:0.5px solid var(--border);padding:16px 0;}
+.faq-q{font-size:14px;color:var(--text);font-weight:700;margin-bottom:6px;}
+.faq-a{font-size:13px;color:var(--text-mute);line-height:1.6;}
+.footer-band{background:var(--bg2);border-top:0.5px solid var(--border);padding:28px 40px;text-align:center;}
+.footer-logo{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:6px;}
+.footer-sub{font-size:12px;color:var(--text-ghost);}
+
+/* ── CHARACTER WIZARD ── */
+.wiz-wrap{max-width:680px;margin:0 auto;padding:24px;}
+.wiz-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;}
+.wiz-top{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.wiz-logo{font-size:14px;font-weight:700;color:var(--gold);}
+.prog-bar{height:3px;background:var(--border);}
+.prog-fill{height:3px;background:var(--gold);transition:width 0.4s;border-radius:0 2px 2px 0;}
+.step-labels{display:flex;padding:10px 20px 0;}
+.step-lbl{flex:1;font-size:10px;text-align:center;color:var(--text-ghost);text-transform:uppercase;letter-spacing:0.5px;transition:color 0.3s;}
+.step-lbl.active{color:var(--gold);}
+.step-lbl.done{color:#5a8a4a;}
+.wiz-content{padding:24px;}
+.wiz-footer{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-top:0.5px solid var(--border);background:var(--bg2);}
+.wiz-section-title{font-size:18px;font-weight:700;color:var(--gold);margin-bottom:4px;}
+.wiz-section-sub{font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.5;}
+.dark-input{width:100%;background:var(--bg2);border:0.5px solid var(--gold-mute);border-radius:6px;padding:10px 13px;font-size:14px;color:var(--text);outline:none;}
+.dark-input::placeholder{color:var(--text-ghost);}
+.dark-input:focus{border-color:var(--gold-dark);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.input-lbl{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;}
+.option-card{background:var(--bg2);border:0.5px solid var(--gold-mute);border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:border-color 0.2s;}
+.option-card:hover{border-color:var(--gold-dark);background:var(--bg4);}
+.option-card.selected{border-color:var(--gold);background:var(--bg4);}
+.option-card.selected .oc-name{color:var(--gold);}
+.oc-icon{font-size:18px;margin-bottom:5px;display:block;color:var(--text-mute);}
+.oc-name{font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:2px;}
+.oc-sub{font-size:10px;color:var(--text-ghost);line-height:1.4;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.stat-box{background:var(--bg2);border:0.5px solid var(--gold-mute);border-radius:8px;padding:10px;text-align:center;}
+.stat-name{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:700;color:var(--gold);}
+.stat-mod{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.roll-btn{background:var(--red-bg);border:0.5px solid var(--gold-dark);border-radius:6px;padding:9px 18px;font-size:13px;color:var(--gold);font-weight:700;margin-bottom:14px;}
+.roll-btn:hover{background:#3a2015;}
+.trait-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.trait-lbl{font-size:11px;color:var(--text-dim);min-width:90px;text-transform:uppercase;letter-spacing:0.5px;}
+.trait-select{flex:1;background:var(--bg2);border:0.5px solid var(--gold-mute);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);outline:none;}
+.trait-select:focus{border-color:var(--gold-dark);}
+.char-preview{background:var(--bg2);border:0.5px solid var(--gold-mute);border-radius:8px;padding:14px;margin-top:10px;}
+.cp-name{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:2px;}
+.cp-sub{font-size:12px;color:var(--text-dim);margin-bottom:8px;}
+.hp-badge{background:var(--red-bg);border:0.5px solid var(--red-border);border-radius:4px;padding:3px 10px;font-size:13px;color:#d4885a;font-weight:700;display:inline-block;margin-top:6px;}
+.bg-tag{display:inline-block;background:var(--red-bg);border:0.5px solid #5a4020;border-radius:20px;padding:3px 10px;font-size:11px;color:var(--gold);margin:2px;}
+.btn-back{background:transparent;border:0.5px solid var(--gold-mute);border-radius:6px;padding:9px 18px;font-size:13px;color:var(--text-dim);}
+.btn-back:hover{border-color:var(--gold-dark);color:var(--gold);}
+.btn-next{background:#5a3a10;border:0.5px solid var(--gold-dark);border-radius:6px;padding:9px 22px;font-size:13px;color:var(--gold);font-weight:700;}
+.btn-next:hover{background:#7a4a15;}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;}
+.launch-btn{width:100%;background:#4a3a10;border:0.5px solid var(--gold);border-radius:8px;padding:13px;font-size:14px;color:var(--gold);font-weight:700;text-align:center;margin-top:10px;}
+.launch-btn:hover{background:#5a4a15;}
+
+/* ── DUNGEON MASTER ── */
+.dm-app{background:var(--bg3);border-radius:12px;overflow:hidden;min-height:580px;}
+.dm-topbar{background:var(--bg2);border-bottom:0.5px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}
+.dm-logo{font-size:14px;font-weight:700;color:var(--gold);}
+.dm-main{display:grid;grid-template-columns:210px 1fr;min-height:530px;}
+.dm-sidebar{background:var(--bg2);border-right:0.5px solid var(--border);padding:14px;}
+.sidebar-label{font-size:10px;color:var(--text-ghost);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.char-card-dm{background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;}
+.char-name-dm{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:2px;}
+.char-sub-dm{font-size:11px;color:var(--text-dim);}
+.dm-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:10px;}
+.dm-stat{background:var(--bg2);border-radius:4px;padding:5px 4px;text-align:center;}
+.dm-stat-val{font-size:14px;font-weight:700;color:var(--gold);display:block;}
+.dm-stat-lbl{font-size:9px;color:var(--text-mute);text-transform:uppercase;}
+.hp-bar-wrap{margin-top:10px;}
+.hp-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text-mute);margin-bottom:4px;}
+.hp-bar{height:4px;background:var(--red-bg);border-radius:2px;}
+.hp-fill{height:4px;background:#8b3a2a;border-radius:2px;}
+.side-btn{width:100%;background:var(--bg4);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text-mute);text-align:left;margin-bottom:6px;}
+.side-btn:hover{background:var(--border);color:var(--gold);}
+.chat-area{display:flex;flex-direction:column;}
+.story-box{flex:1;padding:18px;overflow-y:auto;max-height:400px;}
+.dm-msg-dm{background:var(--bg4);border:0.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.dm-msg-label{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
+.dm-msg-text{font-size:13px;color:var(--text);line-height:1.7;}
+.player-msg-dm{background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.player-msg-label{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:700;}
+.player-msg-text{font-size:13px;color:#9fc8a8;line-height:1.6;}
+.dm-input-area{border-top:0.5px solid var(--border);padding:12px 18px;background:var(--bg2);}
+.action-chips{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.chip{background:var(--bg4);border:0.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text-mute);cursor:pointer;white-space:nowrap;}
+.chip:hover{background:var(--border);color:var(--gold);}
+.dm-input-row{display:flex;gap:8px;}
+.dm-txt-input{flex:1;background:var(--bg4);border:0.5px solid var(--border);border-radius:6px;padding:9px 12px;font-size:13px;color:var(--text);outline:none;}
+.dm-txt-input::placeholder{color:var(--border);}
+.dm-txt-input:focus{border-color:#5a4020;}
+.dm-send-btn{background:#5a3a10;border:0.5px solid var(--gold-dark);border-radius:6px;padding:9px 16px;font-size:12px;color:var(--gold);font-weight:700;}
+.dm-send-btn:hover{background:#7a4a15;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">Realm AI <span>Dungeon Master</span></div>
+  <div class="nav-links">
+    <a class="nav-link" onclick="showPage('landing')">Home</a>
+    <a class="nav-link" onclick="showPage('wizard')">Create Character</a>
+    <a class="nav-link" onclick="showPage('dm')">Play</a>
+    <button class="nav-cta" onclick="showPage('landing');setTimeout(()=>document.getElementById('waitlist-email').focus(),100)">Join free</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════
+     LANDING PAGE
+══════════════════════════════ -->
+<div class="page active" id="page-landing">
+
+  <div class="hero">
+    <div class="hero-eyebrow">No DM required</div>
+    <h1 class="hero-title">Your AI Dungeon Master<br><span>is always ready to play</span></h1>
+    <p class="hero-sub">Realm AI runs full D&D-style campaigns for solo players and groups. Build your character, choose your world, and let an AI Dungeon Master narrate your adventure — any time, no friends required.</p>
+    <div class="waitlist-form">
+      <input class="waitlist-input" id="waitlist-email" type="email" placeholder="Enter your email..."/>
+      <button class="waitlist-btn" onclick="joinWaitlist('waitlist-email','success1')">Join free</button>
+    </div>
+    <div class="hero-note">Free to start — 3 sessions per month, no credit card needed</div>
+    <div class="social-proof">
+      <div class="sp-item">Solo play friendly</div><div class="sp-dot"></div>
+      <div class="sp-item">Unlimited campaign types</div><div class="sp-dot"></div>
+      <div class="sp-item">D&D 5e inspired</div><div class="sp-dot"></div>
+      <div class="sp-item">Works in your browser</div>
+    </div>
+    <div class="success-msg" id="success1">You're on the list. Adventure incoming.</div>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="section">
+    <div class="section-label">Features</div>
+    <div class="section-title">Everything a DM does — handled by AI</div>
+    <div class="section-sub">No prep, no scheduling, no waiting. Just play.</div>
+    <div class="features-grid">
+      <div class="feat-card"><span class="feat-icon">⚔️</span><div class="feat-title">Live AI storytelling</div><div class="feat-body">Your DM reacts to everything you do in real time. Sneak past the guard, burn down the tavern — the story adapts.</div></div>
+      <div class="feat-card"><span class="feat-icon">🎲</span><div class="feat-title">Real dice mechanics</div><div class="feat-body">Perception checks, combat rolls, saving throws — the AI calls for dice and narrates results with full dramatic weight.</div></div>
+      <div class="feat-card"><span class="feat-icon">🧙</span><div class="feat-title">Character creation wizard</div><div class="feat-body">Build your hero from scratch. Race, class, background, stats, backstory — the DM remembers everything.</div></div>
+      <div class="feat-card"><span class="feat-icon">🗺️</span><div class="feat-title">Campaign builder</div><div class="feat-body">Set your world, your quest, your tone — dark horror, high fantasy, gritty survival. The DM adjusts to match.</div></div>
+      <div class="feat-card"><span class="feat-icon">👥</span><div class="feat-title">Solo or group play</div><div class="feat-body">Play alone at midnight or run a session with up to 4 friends. One AI DM handles the whole table.</div></div>
+      <div class="feat-card"><span class="feat-icon">💾</span><div class="feat-title">Save your campaign</div><div class="feat-body">Pick up exactly where you left off. Your character, your choices, your story — all saved on Pro plans.</div></div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="section">
+    <div class="section-label">See it play</div>
+    <div class="section-title">A session in progress</div>
+    <div class="section-sub">A real exchange from Realm AI. The DM narrates, you act, the world responds.</div>
+    <div class="demo-box">
+      <div class="dm-bubble"><div class="dm-lbl">Dungeon Master</div><div class="dm-txt">The village elder's hands tremble as she unrolls the parchment. Three children vanished near the old mill in as many nights. The last one left a trail of small footprints — leading into the water, not out of it.<br><br>"You're the only one who came when I sent ravens," she says. "Name your price."<br><br>What do you do?</div></div>
+      <div class="player-bubble"><div class="player-lbl">Kira (You)</div><div class="player-txt">I ask her to describe exactly what the mill looked like before it was abandoned, and whether anything unusual happened the night before the first disappearance.</div></div>
+      <div class="dm-bubble"><div class="dm-lbl">Dungeon Master</div><div class="dm-txt">Smart thinking. Roll Investigation — you're reading between her words as much as listening.<br><br>She tells you the mill stopped three years ago when the miller drowned in the race. His body was never recovered. The night before the first child vanished, two farmers reported seeing a lantern moving through the mill at midnight.<br><br>You rolled a 17. You catch something she didn't say: her eyes flick to the window when she mentions the miller's name. She knew him. Well.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:20px;">
+      <button class="nav-cta" style="padding:12px 28px;font-size:14px;" onclick="showPage('wizard')">Create your character and play →</button>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="section">
+    <div class="section-label">Pricing</div>
+    <div class="section-title">Start free. Upgrade when you're hooked.</div>
+    <div class="section-sub">Every plan includes the full character creator and AI Dungeon Master.</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Adventurer</div>
+        <div class="price-amount">$0<span>/mo</span></div>
+        <div class="price-desc">Try Realm AI with no commitment</div>
+        <div class="price-feature"><span class="pf-check">+</span>3 sessions per month</div>
+        <div class="price-feature"><span class="pf-check">+</span>Full character creation</div>
+        <div class="price-feature"><span class="pf-check">+</span>1 active campaign</div>
+        <button class="price-btn" onclick="showPage('wizard')">Get started free</button>
+      </div>
+      <div class="price-card featured">
+        <div class="badge-pop">Most popular</div>
+        <div class="price-tier gold">Hero — $7.99/mo</div>
+        <div class="price-amount">$7.99<span>/mo</span></div>
+        <div class="price-desc">For dedicated solo adventurers</div>
+        <div class="price-feature"><span class="pf-check">+</span>Unlimited sessions</div>
+        <div class="price-feature"><span class="pf-check">+</span>Save campaign progress</div>
+        <div class="price-feature"><span class="pf-check">+</span>Multiple characters</div>
+        <div class="price-feature"><span class="pf-check">+</span>Custom world settings</div>
+        <button class="price-btn gold-btn" onclick="joinWaitlist('waitlist-email','success1');showPage('landing')">Join waitlist</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Guild — $14.99/mo</div>
+        <div class="price-amount">$14.99<span>/mo</span></div>
+        <div class="price-desc">For groups who want to play together</div>
+        <div class="price-feature"><span class="pf-check">+</span>Everything in Hero</div>
+        <div class="price-feature"><span class="pf-check">+</span>Up to 4 players per campaign</div>
+        <div class="price-feature"><span class="pf-check">+</span>Shared party campaigns</div>
+        <button class="price-btn" onclick="joinWaitlist('waitlist-email','success1');showPage('landing')">Join waitlist</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="section">
+    <div class="section-label">FAQ</div>
+    <div class="section-title">Questions, answered</div>
+    <div class="faq-item"><div class="faq-q">Do I need to know D&D to play?</div><div class="faq-a">Not at all. The character wizard walks you through everything and the DM explains rules as they come up.</div></div>
+    <div class="faq-item"><div class="faq-q">Is the storytelling actually good?</div><div class="faq-a">Realm AI uses Claude — one of the best AI storytellers available. It remembers context, builds tension, and surprises you.</div></div>
+    <div class="faq-item"><div class="faq-q">Can I really play solo with no friends?</div><div class="faq-a">That's what it's built for. Solo tabletop RPG is one of the fastest-growing gaming communities. Realm AI is designed so one player gets a full, rich session any time.</div></div>
+    <div class="faq-item"><div class="faq-q">What happens when I hit my free session limit?</div><div class="faq-a">Your campaign is saved. Upgrade to Hero at any point to keep going, or wait until next month. We never delete your character.</div></div>
+  </div>
+
+  <hr class="divider"/>
+
+  <div style="text-align:center;padding:64px 40px;">
+    <div class="section-label" style="text-align:center;">Ready?</div>
+    <div class="section-title" style="text-align:center;margin-bottom:10px;">Your adventure starts tonight.</div>
+    <p style="font-size:14px;color:var(--text-mute);margin-bottom:28px;">No DM. No scheduling. No waiting. Just you and the story.</p>
+    <div class="waitlist-form" style="max-width:380px;">
+      <input class="waitlist-input" id="waitlist-email-2" type="email" placeholder="Enter your email..."/>
+      <button class="waitlist-btn" onclick="joinWaitlist('waitlist-email-2','success2')">Join free</button>
+    </div>
+    <div class="success-msg" id="success2" style="margin-top:10px;">You're on the list. We'll be in touch.</div>
+  </div>
+
+  <div class="footer-band">
+    <div class="footer-logo">Realm AI</div>
+    <div class="footer-sub">Built with Claude · Designed for adventurers · Play anywhere</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     CHARACTER WIZARD
+══════════════════════════════ -->
+<div class="page" id="page-wizard">
+  <div class="wiz-wrap">
+    <div class="wiz-card">
+      <div class="wiz-top">
+        <div class="wiz-logo">Realm AI — Character Forge</div>
+        <div style="font-size:11px;color:var(--text-mute);" id="wiz-step-top">Step 1 of 5</div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="wiz-prog" style="width:20%"></div></div>
+      <div class="step-labels">
+        <div class="step-lbl active" id="wlbl0">Origin</div>
+        <div class="step-lbl" id="wlbl1">Race</div>
+        <div class="step-lbl" id="wlbl2">Class</div>
+        <div class="step-lbl" id="wlbl3">Stats</div>
+        <div class="step-lbl" id="wlbl4">Finish</div>
+      </div>
+      <div id="wiz-content" class="wiz-content"></div>
+      <div class="wiz-footer">
+        <button class="btn-back" id="wiz-back" onclick="wizPrev()" style="visibility:hidden">Back</button>
+        <span style="font-size:11px;color:var(--text-mute);" id="wiz-counter">1 of 5</span>
+        <button class="btn-next" id="wiz-next" onclick="wizNext()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DUNGEON MASTER
+══════════════════════════════ -->
+<div class="page" id="page-dm">
+  <div style="max-width:860px;margin:0 auto;padding:20px;">
+    <div class="dm-app">
+      <div class="dm-topbar">
+        <div class="dm-logo">Realm AI — Dungeon Master</div>
+        <div style="font-size:11px;color:var(--text-mute);" id="dm-char-label">No character loaded</div>
+      </div>
+      <div class="dm-main">
+        <div class="dm-sidebar">
+          <div class="sidebar-label">Character</div>
+          <div class="char-card-dm">
+            <div class="char-name-dm" id="dm-name">—</div>
+            <div class="char-sub-dm" id="dm-sub">Create a character first</div>
+            <div class="dm-stat-row" id="dm-stats"></div>
+            <div class="hp-bar-wrap">
+              <div class="hp-label"><span>HP</span><span id="dm-hp">—</span></div>
+              <div class="hp-bar"><div class="hp-fill" id="dm-hp-fill" style="width:75%"></div></div>
+            </div>
+          </div>
+          <div class="sidebar-label">Actions</div>
+          <button class="side-btn" onclick="dmQuick('Roll a perception check and tell me what I notice')">Roll perception</button>
+          <button class="side-btn" onclick="dmQuick('What am I currently carrying in my inventory?')">View inventory</button>
+          <button class="side-btn" onclick="dmQuick('Generate a random encounter appropriate for my character level')">Random encounter</button>
+          <button class="side-btn" onclick="showPage('wizard')">New character</button>
+        </div>
+        <div class="chat-area">
+          <div class="story-box" id="dm-story"></div>
+          <div class="dm-input-area">
+            <div class="action-chips">
+              <div class="chip" onclick="dmSetInput('I draw my weapon and approach cautiously')">Draw weapon</div>
+              <div class="chip" onclick="dmSetInput('I search the area carefully')">Search area</div>
+              <div class="chip" onclick="dmSetInput('I try to sneak past undetected')">Sneak past</div>
+              <div class="chip" onclick="dmSetInput('I attempt to talk to them')">Talk</div>
+              <div class="chip" onclick="dmSetInput('I retreat and look for another way')">Retreat</div>
+            </div>
+            <div class="dm-input-row">
+              <input class="dm-txt-input" id="dm-input" type="text" placeholder="What do you do?"/>
+              <button class="dm-send-btn" onclick="dmSend()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PAGE ROUTER ──
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── WAITLIST ──
+function joinWaitlist(inputId,msgId){
+  const email=document.getElementById(inputId).value.trim();
+  if(!email||!email.includes('@'))return;
+  document.getElementById(msgId).style.display='block';
+  document.getElementById(inputId).value='';
+}
+
+// ══════════════════════════════
+// CHARACTER WIZARD
+// ══════════════════════════════
+const char={name:'',pronouns:'',backstory:'',race:'',raceData:null,cls:'',clsData:null,stats:{STR:0,DEX:0,CON:0,INT:0,WIS:0,CHA:0},background:'',alignment:'',personality:''};
+let wizStep=0;
+
+const races=[
+  {id:'human',icon:'👤',name:'Human',sub:'Versatile and ambitious',hp:0,bonus:'All stats +1',lore:'Humans rise through sheer will. No innate magic — just relentless drive.'},
+  {id:'elf',icon:'🌿',name:'Elf',sub:'Grace and ancient wisdom',hp:0,bonus:'DEX +2, INT +1',lore:'Elves walk between worlds, their perception sharpened by centuries of quiet watching.'},
+  {id:'dwarf',icon:'⛏️',name:'Dwarf',sub:'Unyielding and sturdy',hp:2,bonus:'CON +2, STR +1',lore:'Forged in mountain halls, dwarves carry stone in their bones and gold in their hearts.'},
+  {id:'halfling',icon:'🌾',name:'Halfling',sub:'Lucky and quick-footed',hp:0,bonus:'DEX +2, CHA +1',lore:'Small in stature, enormous in luck. Halflings slip through danger like smoke.'},
+  {id:'tiefling',icon:'🔥',name:'Tiefling',sub:'Infernal heritage',hp:0,bonus:'INT +1, CHA +2',lore:'Born of dark pacts, tieflings carry the weight of suspicion — and the gift of fire.'},
+  {id:'dragonborn',icon:'🐉',name:'Dragonborn',sub:'Draconic power',hp:0,bonus:'STR +2, CHA +1',lore:'Children of dragons. Each breath carries ancestral fire — or frost, or lightning.'},
+];
+const classes=[
+  {id:'fighter',icon:'⚔️',name:'Fighter',sub:'STR / DEX',hitDie:10,ability:'Action Surge — extra attack per rest',flavor:'You live and breathe combat. Every battle is a puzzle you solve with steel.'},
+  {id:'wizard',icon:'📜',name:'Wizard',sub:'INT',hitDie:6,ability:'Arcane Recovery — regain spell slots',flavor:'The world is a formula. You have memorized the variables.'},
+  {id:'rogue',icon:'🗡️',name:'Rogue',sub:'DEX',hitDie:8,ability:'Sneak Attack — bonus damage from cunning',flavor:'The best fight is the one your enemy never saw coming.'},
+  {id:'paladin',icon:'🛡️',name:'Paladin',sub:'STR / CHA',hitDie:10,ability:'Divine Smite — channel holy power',flavor:'Your oath is your weapon. Break it and you break yourself.'},
+  {id:'ranger',icon:'🏹',name:'Ranger',sub:'DEX / WIS',hitDie:10,ability:'Favored Enemy — bonus vs chosen foe',flavor:'The wilderness is not hostile. It just has rules most people never learn.'},
+  {id:'barbarian',icon:'🪓',name:'Barbarian',sub:'STR / CON',hitDie:12,ability:'Rage — resist damage, hit harder',flavor:'Civilization is a thin veneer. Beneath it, something older waits.'},
+];
+const backgrounds=['Acolyte','Criminal','Folk Hero','Noble','Sage','Soldier','Outlander','Charlatan','Hermit','Merchant'];
+const alignments=['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil'];
+const personalities=['Bold and reckless — acts first, thinks later','Cautious and methodical — plans every move','Warm and protective — puts allies first','Dark and brooding — haunted by the past','Curious and excitable — everything is an adventure','Stoic and duty-bound — honor above all'];
+
+function roll4d6(){const d=[0,1,2,3].map(()=>Math.floor(Math.random()*6)+1);d.sort((a,b)=>a-b);return d.slice(1).reduce((s,v)=>s+v,0);}
+function mod(v){return Math.floor((v-10)/2);}
+function modStr(v){const m=mod(v);return(m>=0?'+':'')+m;}
+function baseHP(){if(!char.clsData)return 8;return char.clsData.hitDie+mod(char.stats.CON||10)+(char.raceData?char.raceData.hp:0);}
+
+function wizSelectRace(id){char.race=id;char.raceData=races.find(r=>r.id===id);document.querySelectorAll('.option-card[data-race]').forEach(el=>el.classList.toggle('selected',el.dataset.race===id));wizUpdateNext();}
+function wizSelectClass(id){char.cls=id;char.clsData=classes.find(c=>c.id===id);document.querySelectorAll('.option-card[data-cls]').forEach(el=>el.classList.toggle('selected',el.dataset.cls===id));wizUpdateNext();}
+function wizRollStats(){Object.keys(char.stats).forEach(k=>{char.stats[k]=roll4d6();});wizRender();}
+
+function wizSaveStep(){
+  if(wizStep===0){char.name=document.getElementById('inp-name')?.value||'';char.pronouns=document.getElementById('inp-pronouns')?.value||'';char.backstory=document.getElementById('inp-backstory')?.value||'';}
+  if(wizStep===3){char.background=document.getElementById('sel-bg')?.value||'';char.alignment=document.getElementById('sel-align')?.value||'';char.personality=document.getElementById('sel-pers')?.value||'';}
+}
+function wizCanProceed(){
+  if(wizStep===0)return(document.getElementById('inp-name')?.value||'').trim().length>0;
+  if(wizStep===1)return!!char.race;
+  if(wizStep===2)return!!char.cls;
+  if(wizStep===3)return Object.values(char.stats).every(v=>v>0);
+  return true;
+}
+function wizUpdateNext(){const btn=document.getElementById('wiz-next');if(btn)btn.disabled=!wizCanProceed();}
+
+const wizSteps=[
+  ()=>`<div class="wiz-section-title">Who are you?</div><div class="wiz-section-sub">Give your hero a name and a hint of their past.</div>
+    <div class="grid-2"><div><div class="input-lbl">Character name</div><input class="dark-input" id="inp-name" placeholder="Aldric Stonehaven..." value="${char.name}" oninput="wizUpdateNext()"/></div>
+    <div><div class="input-lbl">Pronouns</div><input class="dark-input" id="inp-pronouns" placeholder="he/him, she/her..." value="${char.pronouns}"/></div></div>
+    <div class="input-lbl" style="margin-top:10px;">Backstory (optional)</div>
+    <textarea class="dark-input" id="inp-backstory" rows="3" placeholder="A disgraced knight seeking redemption...">${char.backstory}</textarea>`,
+
+  ()=>`<div class="wiz-section-title">Choose your race</div><div class="wiz-section-sub">Your ancestry shapes your body, instincts, and how the world sees you.</div>
+    <div class="grid-3">${races.map(r=>`<div class="option-card${char.race===r.id?' selected':''}" data-race="${r.id}" onclick="wizSelectRace('${r.id}')"><span class="oc-icon">${r.icon}</span><div class="oc-name">${r.name}</div><div class="oc-sub">${r.bonus}</div></div>`).join('')}</div>
+    ${char.raceData?`<div class="char-preview"><div class="cp-name">${char.raceData.icon} ${char.raceData.name}</div><div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${char.raceData.lore}</div></div>`:''}`,
+
+  ()=>`<div class="wiz-section-title">Choose your class</div><div class="wiz-section-sub">Your class defines how you fight, survive, and shape the world.</div>
+    <div class="grid-3">${classes.map(c=>`<div class="option-card${char.cls===c.id?' selected':''}" data-cls="${c.id}" onclick="wizSelectClass('${c.id}')"><span class="oc-icon">${c.icon}</span><div class="oc-name">${c.name}</div><div class="oc-sub">${c.sub}</div></div>`).join('')}</div>
+    ${char.clsData?`<div class="char-preview"><div class="cp-name">${char.clsData.icon} ${char.clsData.name}</div><div style="font-size:11px;color:var(--text-mute);margin:4px 0;text-transform:uppercase;letter-spacing:0.5px;">Signature ability</div><div style="font-size:12px;color:var(--text-dim);">${char.clsData.ability}</div><div style="font-size:11px;color:var(--text-mute);margin-top:6px;font-style:italic;">"${char.clsData.flavor}"</div></div>`:''}`,
+
+  ()=>`<div class="wiz-section-title">Roll your stats</div><div class="wiz-section-sub">4d6 drop lowest. Fate decides — but fate favors the bold.</div>
+    <button class="roll-btn" onclick="wizRollStats()">Roll the dice</button>
+    <div class="stat-grid">${Object.entries(char.stats).map(([k,v])=>`<div class="stat-box"><div class="stat-name">${k}</div><div class="stat-val">${v||'—'}</div>${v?`<div class="stat-mod">${modStr(v)}</div>`:''}</div>`).join('')}</div>
+    <div class="trait-row"><div class="trait-lbl">Background</div><select class="trait-select" id="sel-bg"><option value="">Choose...</option>${backgrounds.map(b=>`<option${char.background===b?' selected':''}>${b}</option>`).join('')}</select></div>
+    <div class="trait-row"><div class="trait-lbl">Alignment</div><select class="trait-select" id="sel-align"><option value="">Choose...</option>${alignments.map(a=>`<option${char.alignment===a?' selected':''}>${a}</option>`).join('')}</select></div>
+    <div class="trait-row"><div class="trait-lbl">Personality</div><select class="trait-select" id="sel-pers"><option value="">Choose...</option>${personalities.map(p=>`<option${char.personality===p?' selected':''}>${p}</option>`).join('')}</select></div>`,
+
+  ()=>`<div class="wiz-section-title" style="color:var(--green);">Your character is ready.</div><div class="wiz-section-sub">Here is your complete character sheet. Your adventure begins now.</div>
+    <div class="char-preview"><div class="cp-name">${char.name||'Unnamed Hero'}</div><div class="cp-sub">${char.pronouns?char.pronouns+' · ':''} ${char.raceData?char.raceData.name:''} ${char.clsData?char.clsData.name:''} · Level 1</div>
+    <div style="margin:6px 0;"><span class="bg-tag">${char.background||'No background'}</span><span class="bg-tag">${char.alignment||'Unaligned'}</span></div>
+    <div class="hp-badge">HP ${baseHP()}</div></div>
+    <div class="stat-grid">${Object.entries(char.stats).map(([k,v])=>`<div class="stat-box"><div class="stat-name">${k}</div><div class="stat-val">${v||8}</div><div class="stat-mod">${modStr(v||8)}</div></div>`).join('')}</div>
+    ${char.backstory?`<div class="char-preview"><div style="font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Backstory</div><div style="font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.6;">${char.backstory}</div></div>`:''}
+    <button class="launch-btn" onclick="beginAdventure()">Begin your adventure →</button>`
+];
+
+function wizRender(){
+  document.getElementById('wiz-content').innerHTML=wizSteps[wizStep]();
+  document.getElementById('wiz-prog').style.width=((wizStep+1)/5*100)+'%';
+  document.getElementById('wiz-counter').textContent=`${wizStep+1} of 5`;
+  document.getElementById('wiz-step-top').textContent=`Step ${wizStep+1} of 5`;
+  ['wlbl0','wlbl1','wlbl2','wlbl3','wlbl4'].forEach((id,i)=>{
+    document.getElementById(id).className='step-lbl'+(i===wizStep?' active':i<wizStep?' done':'');
+  });
+  document.getElementById('wiz-back').style.visibility=wizStep>0?'visible':'hidden';
+  document.getElementById('wiz-next').style.display=wizStep===4?'none':'block';
+  wizUpdateNext();
+}
+function wizNext(){wizSaveStep();if(!wizCanProceed())return;if(wizStep<4){wizStep++;wizRender();}}
+function wizPrev(){wizSaveStep();if(wizStep>0){wizStep--;wizRender();}}
+
+function beginAdventure(){
+  // Load character into DM
+  document.getElementById('dm-name').textContent=char.name||'Hero';
+  document.getElementById('dm-sub').textContent=`${char.raceData?char.raceData.name:''} ${char.clsData?char.clsData.name:''} · Level 1`;
+  document.getElementById('dm-char-label').textContent=char.name||'Hero';
+  document.getElementById('dm-hp').textContent=`${baseHP()} / ${baseHP()}`;
+  const statsEl=document.getElementById('dm-stats');
+  statsEl.innerHTML=Object.entries(char.stats).map(([k,v])=>`<div class="dm-stat"><span class="dm-stat-val">${v||8}</span><span class="dm-stat-lbl">${k}</span></div>`).join('');
+  dmHistory=[];
+  document.getElementById('dm-story').innerHTML='';
+  dmCharSummary=`The player's character is ${char.name||'a hero'}, a ${char.raceData?char.raceData.name:''} ${char.clsData?char.clsData.name:''} at Level 1 with ${baseHP()} HP. Stats — STR:${char.stats.STR} DEX:${char.stats.DEX} CON:${char.stats.CON} INT:${char.stats.INT} WIS:${char.stats.WIS} CHA:${char.stats.CHA}. Background: ${char.background||'unknown'}. Alignment: ${char.alignment||'unknown'}. Personality: ${char.personality||'unknown'}. ${char.backstory?'Backstory: '+char.backstory:''}`;
+  showPage('dm');
+  dmAddMessage('dm','Dungeon Master',`The world holds its breath as ${char.name||'you'} steps forward into the unknown.\n\nYou are a ${char.raceData?char.raceData.name:''} ${char.clsData?char.clsData.name:''} — ${char.personality?char.personality.toLowerCase():'ready for whatever comes'}. Your story is just beginning.\n\nA weathered notice board creaks in the wind ahead of you. Three quests are pinned to it:\n\n— A merchant's caravan went missing on the northern road three days ago.\n— Strange lights have been seen in the old watchtower at the edge of the Ashwood forest.\n— The village blacksmith is offering a reward for anyone who can recover his stolen forge hammer.\n\nWhich way does your path lead?`);
+}
+
+// ══════════════════════════════
+// DUNGEON MASTER
+// ══════════════════════════════
+let dmHistory=[];
+let dmCharSummary='a brave adventurer';
+
+const DM_SYSTEM=`You are an expert, dramatic Dungeon Master running a dark fantasy D&D-style adventure called "The Shattered Throne." {{CHAR}}\n\nYour role:\n- Narrate vivid, immersive story scenes in 2-4 short paragraphs\n- React to player actions with real consequences\n- When skill checks or combat happen, say "Roll a [dice] — you got [random number]!" and describe the result dramatically\n- Keep tone dark, dramatic, and exciting\n- Always end your response with "What do you do?" or a direct choice for the player\n- Never break character\n- Be concise but evocative`;
+
+function dmAddMessage(type,label,text){
+  const box=document.getElementById('dm-story');
+  const div=document.createElement('div');
+  div.className=type==='dm'?'dm-msg-dm':'player-msg-dm';
+  div.innerHTML=`<div class="${type==='dm'?'dm-msg-label':'player-msg-label'}">${label}</div><div class="${type==='dm'?'dm-msg-text':'player-msg-text'}">${text.replace(/\n/g,'<br>')}</div>`;
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+
+function dmAddLoading(){
+  const box=document.getElementById('dm-story');
+  const div=document.createElement('div');
+  div.className='dm-msg-dm';div.id='dm-loading';
+  div.innerHTML='<div class="dm-msg-label">Dungeon Master</div><div class="dm-msg-text" style="color:var(--text-ghost);font-style:italic;">The DM ponders your fate...</div>';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+
+function dmSetInput(text){document.getElementById('dm-input').value=text;}
+function dmQuick(text){document.getElementById('dm-input').value=text;dmSend();}
+
+async function dmSend(){
+  const action=document.getElementById('dm-input').value.trim();
+  if(!action)return;
+  document.getElementById('dm-input').value='';
+  dmAddMessage('player',char.name||'You',action);
+  dmHistory.push({role:'user',content:action});
+  dmAddLoading();
+  try{
+    const system=DM_SYSTEM.replace('{{CHAR}}',dmCharSummary);
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:dmHistory})
+    });
+    const data=await res.json();
+    const reply=data.content.map(b=>b.text||'').join('');
+    document.getElementById('dm-loading')?.remove();
+    dmHistory.push({role:'assistant',content:reply});
+    dmAddMessage('dm','Dungeon Master',reply);
+  }catch(e){
+    document.getElementById('dm-loading')?.remove();
+    dmAddMessage('dm','Dungeon Master','The ancient magic wavers... (Something went wrong. Try again.)');
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  wizRender();
+  document.getElementById('dm-input').addEventListener('keydown',e=>{if(e.key==='Enter')dmSend();});
+});
+</script>
+</body>
+</html>
